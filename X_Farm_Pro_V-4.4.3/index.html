@@ -158,6 +158,10 @@
         .fp-row{display:flex;justify-content:space-between;padding:8px 16px;border-bottom:1px solid #111;font-size:12px;}
         .fp-key{color:var(--gray);font-family:monospace;}
         .fp-val{color:var(--main);font-family:monospace;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+        /* Dil Dropdown Teması */
+        #langSelect{background:var(--card);color:var(--text);border:1px solid var(--border);border-radius:4px;padding:2px 5px;}
+        #langSelect option{background:#16181c;color:#e7e9ea;}
     </style>
 </head>
 <body>
@@ -167,16 +171,32 @@
         <button class="nav-btn" onclick="showTab('usage')" data-i18n="nav_usage">Veri Kullanımı</button>
         <button class="nav-btn" onclick="showTab('cmt')" data-i18n="nav_cmt">Yorum Havuzu</button>
         <button class="nav-btn" onclick="showTab('history')" data-i18n="nav_history">İşlem Geçmişi</button>
-        <button class="nav-btn" onclick="toggleLanguage()" id="langBtn"><i class="fas fa-globe"></i> <span>TR</span></button>
+        
+        <div class="nav-btn" style="display:flex;align-items:center;gap:8px;border:none;">
+            <i class="fas fa-globe" style="color:var(--main)"></i>
+            <select id="langSelect" onchange="changeLanguage(this.value)" style="background:transparent;color:var(--text);border:none;font-weight:bold;cursor:pointer;outline:none;font-family:inherit;font-size:13px;">
+                <option value="tr">TR</option>
+                <option value="en">EN</option>
+                <option value="es">ES</option>
+                <option value="fr">FR</option>
+                <option value="de">DE</option>
+                <option value="it">IT</option>
+                <option value="pt">PT</option>
+                <option value="ru">RU</option>
+                <option value="zh">ZH</option>
+                <option value="ja">JA</option>
+                <option value="ar">AR</option>
+                <option value="hi">HI</option>
+            </select>
+        </div>
+
         <div style="margin-left:auto;display:flex;gap:10px;align-items:center;margin-right:20px;">
             <div class="monthly-box"><div class="lbl" data-i18n="this_month">BU AY</div><div id="monthlyTotalUsage" class="val">0.00 MB</div></div>
             <div style="text-align:right;margin-right:8px;border-right:1px solid var(--border);padding-right:12px;">
                 <div style="font-size:9px;color:var(--gray);" data-i18n="session_mb">OTURUM MB</div>
                 <div id="grandTotalUsage" style="font-size:14px;font-weight:bold;color:var(--main);">0.00 MB</div>
             </div>
-            <button id="ghostToggleBtn" onclick="toggleGhostMode()" style="background:#4a148c;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:bold;display:flex;align-items:center;gap:5px;">
-                <i class="fas fa-eye"></i> <span>HAYALET: KAPALI</span>
-            </button>
+            <button id="ghostToggleBtn" onclick="toggleGhostMode()" style="background:#4a148c;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:bold;display:flex;align-items:center;gap:5px;"></button>
             <button onclick="allAction('start')" style="background:var(--green);color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:bold;"><i class="fas fa-play"></i> <span data-i18n="open_all">TÜMÜNÜ AÇ</span></button>
             <button onclick="allAction('stop')" style="background:var(--red);color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-weight:bold;"><i class="fas fa-stop"></i> <span data-i18n="close_all">TÜMÜNÜ KAPAT</span></button>
         </div>
@@ -203,7 +223,7 @@
                         </label>
                         <label style="cursor:pointer;display:flex;align-items:center;margin-top:6px;">
                             <input type="checkbox" id="autoPingCheck" onchange="toggleAutoPing()" checked>
-                            <span style="margin-left:5px;" data-i18n="auto_ping">Anlık Hız Takibi (30s)</span>
+                            <span style="margin-left:5px;" data-i18n="auto_ping">Anlık Hız Takibi</span>
                         </label>
                         <div class="sticky-cfg-row">
                             <i class="fas fa-hourglass-half" style="color:var(--orange);"></i>
@@ -224,7 +244,7 @@
                         <span style="font-size:10px;color:var(--gray);font-weight:bold;">LOG</span>
                         <button class="btn-mini btn-mini-red" onclick="clearLog()" style="font-size:9px;padding:2px 6px;"><i class="fas fa-trash"></i> <span data-i18n="clear">Temizle</span></button>
                     </div>
-                    <div class="log-stream" id="logs">> Sistem Hazır.</div>
+                    <div class="log-stream" id="logs"></div>
                 </div>
             </div>
             <div class="main-panel">
@@ -450,6 +470,7 @@
 
     <script>
         const { ipcRenderer } = require('electron');
+        // ... (Eski değişkenler saklı tutuldu) ...
         let accounts=[],comments=[],activeSessions=new Set(),proxyData={};
         let actionHistory=[],usageData={},monthlyData={},notesData={},dailyOpsData={};
         let isGhostMode=false,bulkProxyTestResults=[];
@@ -460,8 +481,7 @@
         let currentLang = 'tr';
         let statsChart = null;
 
-        // ── Genişletilmiş Çoklu Dil Desteği (12 Dil) ─────────────────────────
-        const languages = ['tr', 'en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'zh', 'ja', 'ar', 'hi'];
+        // ── Genişletilmiş i18n Sözlüğü (Loglar Dahil) ─────────────────────────
         const i18n = {
             tr: { 
                 ghost_on: "HAYALET: AÇIK", ghost_off: "HAYALET: KAPALI", connect: "BAĞLAN", close: "KAPAT", 
@@ -471,7 +491,15 @@
                 bulk_import: "Toplu Hesap İçe Aktar", bulk_proxy: "Toplu Proxy Yükle", data_saver: "Veri Tasarrufu",
                 auto_ping: "Anlık Hız Takibi", minutes: "dk", status_tracking: "Hesap Durum Takibi", test_all: "Test Et",
                 clear: "Temizle", ph_user: "@Kullanıcı", ph_proxy: "Proxy (IP:Port:User:Pass)", ph_target: "Link girin...",
-                sec: "sn", queue: "Kuyruk", report: "BİLDİR", this_month_total: "BU AY TOPLAM", reset_monthly: "Sıfırla"
+                sec: "sn", queue: "Kuyruk", report: "BİLDİR", this_month_total: "BU AY TOPLAM", reset_monthly: "Sıfırla",
+                log_ready: "Sistem Hazır.", log_ghost_active: "Hayalet Modu AKTİF — Sayfa yüklenmez.", log_ghost_deactive: "Hayalet Modu kapatıldı.",
+                log_lang_changed: "Dil değiştirildi: ", log_acc_added: "Hesap eklendi: ", log_acc_deleted: "Hesap silindi: ", log_note_saved: "Not kaydedildi: ",
+                ip_test: "IP TEST", usage_title: "Anlık Proxy Veri Tüketimi", th_acc: "Hesap", th_session: "Oturum", th_month: "Bu Ay", th_status: "Durum", th_proxy_loc: "Proxy / Konum",
+                cmt_pool_title: "Yorum Havuzu", cmt_ph: "Her satıra bir yorum...", cmt_save: "Kaydet", stat_total_lbl: "Toplam", stat_today_lbl: "Bugün", stat_month_lbl: "Bu Ay", stat_like_lbl: "Beğeni",
+                th_time: "Saat", th_date: "Tarih", th_type: "İşlem", th_target: "Hedef", th_mb: "MB", daily_summary: "Günlük Özet", daily_last30: "Son 30 gün", hist_records: "İşlem Kayıtları (Kalıcı)",
+                note_modal_title: "Hesap Notu", note_user: "Kullanıcı Adı", note_pass: "Şifre", note_email: "E-Posta", note_phone: "Telefon / Yedek", note_notes: "Notlar", note_save: "Kaydet",
+                cmt_select_title: "Yorum Seç", cmt_random: "Rastgele", cmt_confirm: "Seç ve Gönder", fp_modal_title: "Parmak İzi Profili", fp_reset: "Sıfırla", report_title: "Sorun bildir",
+                ghost_shield_active: "VERİ KORUMA AKTİF", ghost_shield_sub: "Sayfa gizli modda çalışıyor", sleeping: "UYKUDA", daily_likes: "Beğeni", daily_rt: "RT", daily_cmt: "Yorum"
             },
             en: { 
                 ghost_on: "GHOST: ON", ghost_off: "GHOST: OFF", connect: "CONNECT", close: "CLOSE", 
@@ -481,18 +509,18 @@
                 bulk_import: "Bulk Import", bulk_proxy: "Bulk Proxy", data_saver: "Data Saver",
                 auto_ping: "Auto Ping", minutes: "min", status_tracking: "Status Track", test_all: "Test",
                 clear: "Clear", ph_user: "@User", ph_proxy: "Proxy details...", ph_target: "Enter link...",
-                sec: "sec", queue: "Queue", report: "REPORT", this_month_total: "MONTH TOTAL", reset_monthly: "Reset"
+                sec: "sec", queue: "Queue", report: "REPORT", this_month_total: "MONTH TOTAL", reset_monthly: "Reset",
+                log_ready: "System Ready.", log_ghost_active: "Ghost Mode ACTIVE.", log_ghost_deactive: "Ghost Mode disabled.",
+                log_lang_changed: "Language changed to: ", log_acc_added: "Account added: ", log_acc_deleted: "Account deleted: ", log_note_saved: "Note saved: ",
+                ip_test: "IP TEST", usage_title: "Proxy Data Usage", th_acc: "Account", th_session: "Session", th_month: "Month", th_status: "Status", th_proxy_loc: "Proxy / Location",
+                cmt_pool_title: "Comment Pool", cmt_ph: "One comment per line...", cmt_save: "Save", stat_total_lbl: "Total", stat_today_lbl: "Today", stat_month_lbl: "Month", stat_like_lbl: "Likes",
+                th_time: "Time", th_date: "Date", th_type: "Action", th_target: "Target", th_mb: "MB", daily_summary: "Daily Summary", daily_last30: "Last 30 days", hist_records: "Action Logs (Permanent)",
+                note_modal_title: "Account Note", note_user: "Username", note_pass: "Password", note_email: "Email", note_phone: "Phone / Backup", note_notes: "Notes", note_save: "Save",
+                cmt_select_title: "Select Comment", cmt_random: "Random", cmt_confirm: "Select & Send", fp_modal_title: "Fingerprint Profile", fp_reset: "Reset", report_title: "Report an issue",
+                ghost_shield_active: "DATA PROTECTION ACTIVE", ghost_shield_sub: "Page is running in hidden mode", sleeping: "SLEEPING", daily_likes: "Likes", daily_rt: "RT", daily_cmt: "Comments"
             },
-            es: { 
-                ghost_on: "FANTASMA: ON", ghost_off: "FANTASMA: OFF", connect: "CONECTAR", close: "CERRAR",
-                nav_op: "Operaciones", nav_usage: "Uso de datos", nav_cmt: "Comentarios", nav_history: "Historial",
-                this_month: "MES", session_mb: "SESIÓN MB", open_all: "ABRIR TODO", close_all: "CERRAR TODO",
-                total: "TOTAL", online: "ACTIVO", add_new_acc: "Añadir cuenta", add_btn: "Añadir",
-                bulk_import: "Importar", bulk_proxy: "Proxy masivo", data_saver: "Ahorro datos",
-                auto_ping: "Auto Ping", minutes: "min", status_tracking: "Estado", test_all: "Probar",
-                clear: "Limpiar", ph_user: "@Usuario", ph_proxy: "Datos proxy...", ph_target: "Enlace...",
-                sec: "seg", queue: "Cola", report: "REPORTAR", this_month_total: "TOTAL MES", reset_monthly: "Reiniciar"
-            },
+            es: { ghost_on: "FANTASMA: ON", ghost_off: "FANTASMA: OFF", connect: "CONECTAR", close: "CERRAR", nav_op: "Operaciones", nav_usage: "Uso", nav_cmt: "Comentarios", nav_history: "Historial", this_month: "MES", session_mb: "SESIÓN MB", open_all: "ABRIR TODO", close_all: "CERRAR TODO", total: "TOTAL", online: "ACTIVO", add_new_acc: "Añadir cuenta", add_btn: "Añadir", bulk_import: "Importar", bulk_proxy: "Proxy masivo", data_saver: "Ahorro", auto_ping: "Auto Ping", minutes: "min", status_tracking: "Estado", test_all: "Probar", clear: "Limpiar", ph_user: "@Usuario", ph_proxy: "Proxy...", ph_target: "Enlace...", sec: "seg", queue: "Cola", report: "REPORTAR", this_month_total: "TOTAL MES", reset_monthly: "Reset", log_ready: "Sistema listo.", log_ghost_active: "Modo Fantasma activo.", log_ghost_deactive: "Modo Fantasma desactivado.", log_lang_changed: "Idioma cambiado a: ", log_acc_added: "Cuenta añadida: ", log_acc_deleted: "Cuenta eliminada: ", log_note_saved: "Nota guardada: ",
+                ip_test: "PRUEBA IP", usage_title: "Consumo de Datos Proxy", th_acc: "Cuenta", th_session: "Sesión", th_month: "Mes", th_status: "Estado", th_proxy_loc: "Proxy / Ubicación", cmt_pool_title: "Pool de Comentarios", cmt_ph: "Un comentario por línea...", cmt_save: "Guardar", stat_total_lbl: "Total", stat_today_lbl: "Hoy", stat_month_lbl: "Mes", stat_like_lbl: "Me gusta", th_time: "Hora", th_date: "Fecha", th_type: "Acción", th_target: "Objetivo", th_mb: "MB", daily_summary: "Resumen Diario", daily_last30: "Últimos 30 días", hist_records: "Registros de Acción (Permanente)", note_modal_title: "Nota de Cuenta", note_user: "Usuario", note_pass: "Contraseña", note_email: "Correo", note_phone: "Teléfono", note_notes: "Notas", note_save: "Guardar", cmt_select_title: "Seleccionar Comentario", cmt_random: "Aleatorio", cmt_confirm: "Seleccionar y Enviar", fp_modal_title: "Perfil de Huella", fp_reset: "Reiniciar", report_title: "Reportar problema", ghost_shield_active: "PROTECCIÓN ACTIVA", ghost_shield_sub: "Página oculta", sleeping: "DURMIENDO", daily_likes: "Me gusta", daily_rt: "RT", daily_cmt: "Comentarios" },
             fr: { 
                 ghost_on: "FANTÔME: ON", ghost_off: "FANTÔME: OFF", connect: "CONNECTER", close: "FERMER",
                 nav_op: "Opérations", nav_usage: "Données", nav_cmt: "Commentaires", nav_history: "Historique",
@@ -501,125 +529,54 @@
                 bulk_import: "Importation", bulk_proxy: "Proxy en masse", data_saver: "Économie",
                 auto_ping: "Auto Ping", minutes: "min", status_tracking: "Statut", test_all: "Tester",
                 clear: "Effacer", ph_user: "@Utilisateur", ph_proxy: "Détails proxy...", ph_target: "Lien...",
-                sec: "sec", queue: "File", report: "SIGNALER", this_month_total: "TOTAL MOIS", reset_monthly: "Réinitialiser"
+                sec: "sec", queue: "File", report: "SIGNALER", this_month_total: "TOTAL MOIS", reset_monthly: "Réinitialiser",
+                log_ready: "Système prêt.", log_ghost_active: "Mode Fantôme ACTIF.", log_ghost_deactive: "Mode Fantôme désactivé.",
+                log_lang_changed: "Langue changée en: ", log_acc_added: "Compte ajouté: ", log_acc_deleted: "Compte supprimé: ", log_note_saved: "Note enregistrée: ",
+                ip_test: "TEST IP", usage_title: "Consommation Proxy", th_acc: "Compte", th_session: "Session", th_month: "Mois", th_status: "Statut", th_proxy_loc: "Proxy / Lieu", cmt_pool_title: "Pool de Commentaires", cmt_ph: "Un commentaire par ligne...", cmt_save: "Enregistrer", stat_total_lbl: "Total", stat_today_lbl: "Aujourd'hui", stat_month_lbl: "Mois", stat_like_lbl: "J'aime", th_time: "Heure", th_date: "Date", th_type: "Action", th_target: "Cible", th_mb: "MB", daily_summary: "Résumé Quotidien", daily_last30: "30 derniers jours", hist_records: "Logs (Permanent)", note_modal_title: "Note du Compte", note_user: "Utilisateur", note_pass: "Mdp", note_email: "Email", note_phone: "Tél", note_notes: "Notes", note_save: "Enregistrer", cmt_select_title: "Sélect. Com.", cmt_random: "Aléatoire", cmt_confirm: "Envoyer", fp_modal_title: "Profil Empreinte", fp_reset: "Réinit.", report_title: "Signaler", ghost_shield_active: "PROTECTION ACTIVE", ghost_shield_sub: "Page masquée", sleeping: "EN VEILLE", daily_likes: "J'aime", daily_rt: "RT", daily_cmt: "Com."
             },
-            de: { 
-                ghost_on: "GHOST: AN", ghost_off: "GHOST: AUS", connect: "VERBINDEN", close: "BEENDEN",
-                nav_op: "Operationen", nav_usage: "Datenverbrauch", nav_cmt: "Kommentare", nav_history: "Verlauf",
-                this_month: "MONAT", session_mb: "SITZUNG MB", open_all: "ALLE ÖFFNEN", close_all: "ALLE STOPPEN",
-                total: "GESAMT", online: "ONLINE", add_new_acc: "Konto hinzufügen", add_btn: "Hinzufügen",
-                bulk_import: "Massenimport", bulk_proxy: "Massenproxy", data_saver: "Daten sparen",
-                auto_ping: "Auto Ping", minutes: "min", status_tracking: "Status", test_all: "Testen",
-                clear: "Löschen", ph_user: "@Nutzer", ph_proxy: "Proxy-Daten...", ph_target: "Link eingeben...",
-                sec: "sek", queue: "Warteschlange", report: "MELDEN", this_month_total: "MONAT GESAMT", reset_monthly: "Reset"
-            },
-            it: { 
-                ghost_on: "GHOST: ON", ghost_off: "GHOST: OFF", connect: "CONNETTI", close: "CHIUDI",
-                nav_op: "Operazioni", nav_usage: "Utilizzo", nav_cmt: "Commenti", nav_history: "Cronologia",
-                this_month: "MESE", session_mb: "SESSIONE MB", open_all: "APRI TUTTO", close_all: "CHIUDI TUTTO",
-                total: "TOTALE", online: "ATTIVO", add_new_acc: "Aggiungi account", add_btn: "Aggiungi",
-                bulk_import: "Importa", bulk_proxy: "Proxy di massa", data_saver: "Risparmio",
-                auto_ping: "Auto Ping", minutes: "min", status_tracking: "Stato", test_all: "Test",
-                clear: "Pulisci", ph_user: "@Utente", ph_proxy: "Proxy...", ph_target: "Inserisci link...",
-                sec: "sec", queue: "Coda", report: "REPORT", this_month_total: "TOTALE MESE", reset_monthly: "Reset"
-            },
-            pt: { 
-                ghost_on: "GHOST: LIGADO", ghost_off: "GHOST: DESLIGADO", connect: "CONECTAR", close: "FECHAR",
-                nav_op: "Operações", nav_usage: "Uso", nav_cmt: "Comentários", nav_history: "Histórico",
-                this_month: "MÊS", session_mb: "SESSÃO MB", open_all: "ABRIR TODOS", close_all: "FECHAR TODOS",
-                total: "TOTAL", online: "ONLINE", add_new_acc: "Adicionar conta", add_btn: "Adicionar",
-                bulk_import: "Importar", bulk_proxy: "Proxy em massa", data_saver: "Economia",
-                auto_ping: "Auto Ping", minutes: "min", status_tracking: "Status", test_all: "Testar",
-                clear: "Limpar", ph_user: "@Usuário", ph_proxy: "Proxy...", ph_target: "Link...",
-                sec: "seg", queue: "Fila", report: "REPORTAR", this_month_total: "TOTAL MÊS", reset_monthly: "Reset"
-            },
-            ru: { 
-                ghost_on: "ПРИЗРАК: ВКЛ", ghost_off: "ПРИЗРАК: ВЫКЛ", connect: "ПОДКЛЮЧИТЬ", close: "ЗАКРЫТЬ",
-                nav_op: "Операции", nav_usage: "Трафик", nav_cmt: "Комментарии", nav_history: "История",
-                this_month: "МЕСЯЦ", session_mb: "СЕССИЯ МБ", open_all: "ОТКРЫТЬ ВСЕ", close_all: "ЗАКРЫТЬ ВСЕ",
-                total: "ВСЕГО", online: "В СЕТИ", add_new_acc: "Добавить аккаунт", add_btn: "Добавить",
-                bulk_import: "Импорт", bulk_proxy: "Массовый прокси", data_saver: "Экономия",
-                auto_ping: "Авто-пинг", minutes: "мин", status_tracking: "Статус", test_all: "Тест",
-                clear: "Очистить", ph_user: "@Юзер", ph_proxy: "Прокси...", ph_target: "Ссылка...",
-                sec: "сек", queue: "Очередь", report: "ЖАЛОБА", this_month_total: "ИТОГО МЕСЯЦ", reset_monthly: "Сброс"
-            },
-            zh: { 
-                ghost_on: "幽灵模式: 开启", ghost_off: "幽灵模式: 关闭", connect: "连接", close: "关闭",
-                nav_op: "操作面板", nav_usage: "流量使用", nav_cmt: "评论池", nav_history: "操作历史",
-                this_month: "本月", session_mb: "会话流量", open_all: "开启全部", close_all: "关闭全部",
-                total: "总计", online: "在线", add_new_acc: "添加账户", add_btn: "添加到列表",
-                bulk_import: "批量导入", bulk_proxy: "批量代理", data_saver: "流量节省",
-                auto_ping: "自动延迟", minutes: "分", status_tracking: "状态追踪", test_all: "测试全部",
-                clear: "清除", ph_user: "@用户名", ph_proxy: "代理信息...", ph_target: "输入链接...",
-                sec: "秒", queue: "队列", report: "举报", this_month_total: "本月总计", reset_monthly: "重置"
-            },
-            ja: { 
-                ghost_on: "ゴースト: ON", ghost_off: "ゴースト: OFF", connect: "接続", close: "終了",
-                nav_op: "操作パネル", nav_usage: "データ使用量", nav_cmt: "コメント", nav_history: "履歴",
-                this_month: "今月", session_mb: "セッションMB", open_all: "すべて開く", close_all: "すべて閉じる",
-                total: "合計", online: "オンライン", add_new_acc: "アカウント追加", add_btn: "追加",
-                bulk_import: "一括インポート", bulk_proxy: "一括プロキシ", data_saver: "データ節約",
-                auto_ping: "自動ピング", minutes: "分", status_tracking: "ステータス", test_all: "テスト",
-                clear: "クリア", ph_user: "@ユーザー名", ph_proxy: "プロキシ...", ph_target: "リンクを入力...",
-                sec: "秒", queue: "キュー", report: "報告", this_month_total: "今月の合計", reset_monthly: "リセット"
-            },
-            ar: { 
-                ghost_on: "شبح: مفعل", ghost_off: "شبح: معطل", connect: "اتصال", close: "إغلاق",
-                nav_op: "لوحة العمليات", nav_usage: "استهلاك البيانات", nav_cmt: "مخزن التعليقات", nav_history: "السجل",
-                this_month: "هذا الشهر", session_mb: "بيانات الجلسة", open_all: "فتح الكل", close_all: "إغلاق الكل",
-                total: "إجمالي", online: "نشط", add_new_acc: "إضافة حساب", add_btn: "إضافة",
-                bulk_import: "استيراد جماعي", bulk_proxy: "وكلاء جماعي", data_saver: "توفير البيانات",
-                auto_ping: "فحص تلقائي", minutes: "دقيقة", status_tracking: "تتبع الحالة", test_all: "اختبار",
-                clear: "مسح", ph_user: "@المستخدم", ph_proxy: "بيانات البروكسي...", ph_target: "أدخل الرابط...",
-                sec: "ثانية", queue: "طابور", report: "تبليغ", this_month_total: "إجمالي الشهر", reset_monthly: "إعادة تعيين"
-            },
-            hi: { 
-                ghost_on: "घोस्ट: चालू", ghost_off: "घोस्ट: बंद", connect: "जुड़ें", close: "बंद करें",
-                nav_op: "ऑपरेशन पैनल", nav_usage: "डेटा उपयोग", nav_cmt: "टिप्पणी पूल", nav_history: "इतिहास",
-                this_month: "इस महीने", session_mb: "सत्र MB", open_all: "सभी खोलें", close_all: "सभी बंद करें",
-                total: "कुल", online: "सक्रिय", add_new_acc: "खाता जोड़ें", add_btn: "सूची में जोड़ें",
-                bulk_import: "थोक आयात", bulk_proxy: "थोक प्रॉक्सी", data_saver: "डेटा बचत",
-                auto_ping: "ऑटो पिंग", minutes: "मिनट", status_tracking: "स्थिति ट्रैक", test_all: "परीक्षण",
-                clear: "साफ़ करें", ph_user: "@उपयोगकर्ता", ph_proxy: "प्रॉक्सी विवरण...", ph_target: "लिंक दर्ज करें...",
-                sec: "सेकंड", queue: "कतार", report: "रिपोर्ट", this_month_total: "महीने का कुल", reset_monthly: "रीसेट"
-            }
+            de: { ghost_on: "GHOST: AN", ghost_off: "GHOST: AUS", connect: "VERBINDEN", close: "BEENDEN", nav_op: "Operationen", nav_usage: "Datenverbrauch", nav_cmt: "Kommentare", nav_history: "Verlauf", this_month: "MONAT", session_mb: "SITZUNG MB", open_all: "ALLE ÖFFNEN", close_all: "ALLE STOPPEN", total: "GESAMT", online: "ONLINE", add_new_acc: "Konto hinzufügen", add_btn: "Hinzufügen", bulk_import: "Massenimport", bulk_proxy: "Massenproxy", data_saver: "Daten sparen", auto_ping: "Auto Ping", minutes: "min", status_tracking: "Status", test_all: "Testen", clear: "Löschen", ph_user: "@Nutzer", ph_proxy: "Proxy-Daten...", ph_target: "Link...", sec: "sek", queue: "Warteschlange", report: "MELDEN", this_month_total: "MONAT GESAMT", reset_monthly: "Reset", log_ready: "System bereit.", log_ghost_active: "Ghost-Modus AKTIVIERT.", log_ghost_deactive: "Ghost-Modus deaktiviert.", log_lang_changed: "Sprache geändert in: ", log_acc_added: "Konto hinzugefügt: ", log_acc_deleted: "Konto gelöscht: ", log_note_saved: "Notiz gespeichert: ",
+                ip_test: "IP TEST", usage_title: "Proxy Datenverbrauch", th_acc: "Konto", th_session: "Sitzung", th_month: "Monat", th_status: "Status", th_proxy_loc: "Proxy / Ort", cmt_pool_title: "Kommentar Pool", cmt_ph: "Ein Kommentar pro Zeile...", cmt_save: "Speichern", stat_total_lbl: "Gesamt", stat_today_lbl: "Heute", stat_month_lbl: "Monat", stat_like_lbl: "Likes", th_time: "Zeit", th_date: "Datum", th_type: "Aktion", th_target: "Ziel", th_mb: "MB", daily_summary: "Tagesübersicht", daily_last30: "Letzte 30 Tage", hist_records: "Logs (Permanent)", note_modal_title: "Konto Notiz", note_user: "Nutzer", note_pass: "Passwort", note_email: "Email", note_phone: "Tel", note_notes: "Notizen", note_save: "Speichern", cmt_select_title: "Kommentar Wählen", cmt_random: "Zufall", cmt_confirm: "Senden", fp_modal_title: "Fingerabdruck Profil", fp_reset: "Reset", report_title: "Fehler melden", ghost_shield_active: "SCHUTZ AKTIV", ghost_shield_sub: "Seite ausgeblendet", sleeping: "SCHLAFEND", daily_likes: "Likes", daily_rt: "RT", daily_cmt: "Kommentare" },
+            it: { ghost_on: "GHOST: ON", ghost_off: "GHOST: OFF", connect: "CONNETTI", close: "CHIUDI", nav_op: "Operazioni", nav_usage: "Utilizzo", nav_cmt: "Commenti", nav_history: "Cronologia", this_month: "MESE", session_mb: "SESSIONE MB", open_all: "APRI TUTTO", close_all: "CHIUDI TUTTO", total: "TOTALE", online: "ATTIVO", add_new_acc: "Aggiungi account", add_btn: "Aggiungi", bulk_import: "Importa", bulk_proxy: "Proxy", data_saver: "Risparmio", auto_ping: "Auto Ping", minutes: "min", status_tracking: "Stato", test_all: "Test", clear: "Pulisci", ph_user: "@Utente", ph_proxy: "Proxy...", ph_target: "Link...", sec: "sec", queue: "Coda", report: "REPORT", this_month_total: "TOTALE MESE", reset_monthly: "Reset", log_ready: "Sistema pronto.", log_ghost_active: "Modalità Ghost ATTIVA.", log_ghost_deactive: "Modalità Ghost disattivata.", log_lang_changed: "Lingua cambiata in: ", log_acc_added: "Account aggiunto: ", log_acc_deleted: "Account eliminato: ", log_note_saved: "Nota salvata: ",
+                ip_test: "TEST IP", usage_title: "Utilizzo Dati Proxy", th_acc: "Account", th_session: "Sessione", th_month: "Mese", th_status: "Stato", th_proxy_loc: "Proxy / Luogo", cmt_pool_title: "Pool Commenti", cmt_ph: "Un commento per riga...", cmt_save: "Salva", stat_total_lbl: "Totale", stat_today_lbl: "Oggi", stat_month_lbl: "Mese", stat_like_lbl: "Like", th_time: "Ora", th_date: "Data", th_type: "Azione", th_target: "Target", th_mb: "MB", daily_summary: "Sommario", daily_last30: "Ultimi 30 giorni", hist_records: "Logs (Permanente)", note_modal_title: "Nota Account", note_user: "Utente", note_pass: "Password", note_email: "Email", note_phone: "Tel", note_notes: "Note", note_save: "Salva", cmt_select_title: "Seleziona Comm.", cmt_random: "Casuale", cmt_confirm: "Invia", fp_modal_title: "Profilo Impronta", fp_reset: "Reset", report_title: "Segnala", ghost_shield_active: "PROTEZIONE ATTIVA", ghost_shield_sub: "Pagina nascosta", sleeping: "DORMENDO", daily_likes: "Like", daily_rt: "RT", daily_cmt: "Commenti" },
+            pt: { ghost_on: "GHOST: ON", ghost_off: "GHOST: OFF", connect: "CONECTAR", close: "FECHAR", nav_op: "Operações", nav_usage: "Uso", nav_cmt: "Comentários", nav_history: "Histórico", this_month: "MÊS", session_mb: "SESSÃO MB", open_all: "ABRIR TODOS", close_all: "FECHAR TODOS", total: "TOTAL", online: "ONLINE", add_new_acc: "Adicionar conta", add_btn: "Adicionar", bulk_import: "Importar", bulk_proxy: "Proxy", data_saver: "Economia", auto_ping: "Auto Ping", minutes: "min", status_tracking: "Status", test_all: "Testar", clear: "Limpar", ph_user: "@Usuário", ph_proxy: "Proxy...", ph_target: "Link...", sec: "seg", queue: "Fila", report: "REPORTAR", this_month_total: "TOTAL MÊS", reset_monthly: "Reset", log_ready: "Sistema pronto.", log_ghost_active: "Modo Ghost ATIVADO.", log_ghost_deactive: "Modo Ghost desativado.", log_lang_changed: "Idioma alterado para: ", log_acc_added: "Conta adicionada: ", log_acc_deleted: "Conta excluída: ", log_note_saved: "Nota salva: ",
+                ip_test: "TESTE IP", usage_title: "Uso de Dados Proxy", th_acc: "Conta", th_session: "Sessão", th_month: "Mês", th_status: "Status", th_proxy_loc: "Proxy / Local", cmt_pool_title: "Pool de Comentários", cmt_ph: "Um comentário por linha...", cmt_save: "Salvar", stat_total_lbl: "Total", stat_today_lbl: "Hoje", stat_month_lbl: "Mês", stat_like_lbl: "Curtidas", th_time: "Hora", th_date: "Data", th_type: "Ação", th_target: "Alvo", th_mb: "MB", daily_summary: "Resumo Diário", daily_last30: "Últimos 30 dias", hist_records: "Logs (Permanente)", note_modal_title: "Nota da Conta", note_user: "Usuário", note_pass: "Senha", note_email: "Email", note_phone: "Tel", note_notes: "Notas", note_save: "Salvar", cmt_select_title: "Selecionar Comm.", cmt_random: "Aleatório", cmt_confirm: "Enviar", fp_modal_title: "Perfil de Impressão", fp_reset: "Reset", report_title: "Reportar", ghost_shield_active: "PROTEÇÃO ATIVA", ghost_shield_sub: "Página oculta", sleeping: "DORMINDO", daily_likes: "Curtidas", daily_rt: "RT", daily_cmt: "Comentários" },
+            ru: { ghost_on: "ГHOST: ВКЛ", ghost_off: "ГHOST: ВЫКЛ", connect: "ПОДКЛЮЧИТЬ", close: "ЗАКРЫТЬ", nav_op: "Операции", nav_usage: "Трафик", nav_cmt: "Комментарии", nav_history: "История", this_month: "МЕСЯЦ", session_mb: "СЕССИЯ МБ", open_all: "ОТКРЫТЬ ВСЕ", close_all: "ЗАКРЫТЬ ВСЕ", total: "ВСЕГО", online: "В СЕТИ", add_new_acc: "Добавить аккаунт", add_btn: "Добавить", bulk_import: "Импорт", bulk_proxy: "Массовый прокси", data_saver: "Экономия", auto_ping: "Авто-пинг", minutes: "мин", status_tracking: "Статус", test_all: "Тест", clear: "Очистить", ph_user: "@Юзер", ph_proxy: "Прокси...", ph_target: "Ссылка...", sec: "сек", queue: "Очередь", report: "ЖАЛОБА", this_month_total: "ИТОГО МЕСЯЦ", reset_monthly: "Сброс", log_ready: "Система готова.", log_ghost_active: "Режим призрака ВКЛЮЧЕН.", log_ghost_deactive: "Режим призрака выключен.", log_lang_changed: "Язык изменен на: ", log_acc_added: "Аккаунт добавлен: ", log_acc_deleted: "Аккаунт удален: ", log_note_saved: "Заметка сохранена: ",
+                ip_test: "IP ТЕСТ", usage_title: "Трафик Прокси", th_acc: "Аккаунт", th_session: "Сессия", th_month: "Месяц", th_status: "Статус", th_proxy_loc: "Прокси / Локация", cmt_pool_title: "Пул комментариев", cmt_ph: "Один комментарий на строку...", cmt_save: "Сохранить", stat_total_lbl: "Всего", stat_today_lbl: "Сегодня", stat_month_lbl: "Месяц", stat_like_lbl: "Лайки", th_time: "Время", th_date: "Дата", th_type: "Действие", th_target: "Цель", th_mb: "МБ", daily_summary: "Сводка", daily_last30: "30 дней", hist_records: "Логи (Постоянно)", note_modal_title: "Заметка", note_user: "Юзер", note_pass: "Пароль", note_email: "Почта", note_phone: "Тел", note_notes: "Заметки", note_save: "Сохранить", cmt_select_title: "Выбор комм.", cmt_random: "Случайно", cmt_confirm: "Отправить", fp_modal_title: "Профиль отпечатка", fp_reset: "Сброс", report_title: "Жалоба", ghost_shield_active: "ЗАЩИТА АКТИВНА", ghost_shield_sub: "Страница скрыта", sleeping: "СПИТ", daily_likes: "Лайки", daily_rt: "RT", daily_cmt: "Комм." },
+            zh: { ghost_on: "幽灵模式: 开启", ghost_off: "幽灵模式: 关闭", connect: "连接", close: "关闭", nav_op: "操作面板", nav_usage: "流量使用", nav_cmt: "评论池", nav_history: "历史", this_month: "本月", session_mb: "会话流量", open_all: "开启全部", close_all: "关闭全部", total: "总计", online: "在线", add_new_acc: "添加账户", add_btn: "添加", bulk_import: "批量导入", bulk_proxy: "批量代理", data_saver: "流量节省", auto_ping: "自动延迟", minutes: "分", status_tracking: "状态", test_all: "测试全部", clear: "清除", ph_user: "@用户名", ph_proxy: "代理信息...", ph_target: "链接...", sec: "秒", queue: "队列", report: "举报", this_month_total: "本月总计", reset_monthly: "重置", log_ready: "系统就绪。", log_ghost_active: "幽灵模式已开启。", log_ghost_deactive: "幽灵模式已关闭。", log_lang_changed: "语言更改为：", log_acc_added: "账户已添加：", log_acc_deleted: "账户已删除：", log_note_saved: "备注已保存：",
+                ip_test: "IP测试", usage_title: "代理流量消耗", th_acc: "账户", th_session: "会话", th_month: "本月", th_status: "状态", th_proxy_loc: "代理/位置", cmt_pool_title: "评论池", cmt_ph: "每行一个评论...", cmt_save: "保存", stat_total_lbl: "总计", stat_today_lbl: "今天", stat_month_lbl: "本月", stat_like_lbl: "点赞", th_time: "时间", th_date: "日期", th_type: "动作", th_target: "目标", th_mb: "MB", daily_summary: "每日摘要", daily_last30: "最近30天", hist_records: "记录(永久)", note_modal_title: "账户备注", note_user: "用户名", note_pass: "密码", note_email: "邮箱", note_phone: "电话", note_notes: "备注", note_save: "保存", cmt_select_title: "选择评论", cmt_random: "随机", cmt_confirm: "确认并发送", fp_modal_title: "指纹配置", fp_reset: "重置", report_title: "报告问题", ghost_shield_active: "保护激活", ghost_shield_sub: "页面已隐藏", sleeping: "休眠中", daily_likes: "点赞", daily_rt: "RT", daily_cmt: "评论" },
+            ja: { ghost_on: "ゴースト: ON", ghost_off: "ゴースト: OFF", connect: "接続", close: "終了", nav_op: "操作パネル", nav_usage: "使用量", nav_cmt: "コメント", nav_history: "履歴", this_month: "今月", session_mb: "セッション", open_all: "すべて開く", close_all: "すべて閉じる", total: "合計", online: "オンライン", add_new_acc: "追加", add_btn: "追加", bulk_import: "インポート", bulk_proxy: "プロキシ", data_saver: "節約", auto_ping: "ピング", minutes: "分", status_tracking: "ステータス", test_all: "テスト", clear: "クリア", ph_user: "@ユーザー", ph_proxy: "プロキシ...", ph_target: "リンク...", sec: "秒", queue: "キュー", report: "報告", this_month_total: "今月の合計", reset_monthly: "リセット", log_ready: "システムの準備が完了しました。", log_ghost_active: "ゴーストモードが有効です。", log_ghost_deactive: "ゴーストモードが無効になりました。", log_lang_changed: "言語が変更されました：", log_acc_added: "アカウントが追加されました：", log_acc_deleted: "アカウントが削除されました：", log_note_saved: "メモが保存されました：",
+                ip_test: "IPテスト", usage_title: "データ使用量", th_acc: "アカウント", th_session: "セッション", th_month: "今月", th_status: "状態", th_proxy_loc: "プロキシ/場所", cmt_pool_title: "コメントプール", cmt_ph: "1行に1つのコメント...", cmt_save: "保存", stat_total_lbl: "合計", stat_today_lbl: "今日", stat_month_lbl: "今月", stat_like_lbl: "いいね", th_time: "時間", th_date: "日付", th_type: "アクション", th_target: "ターゲット", th_mb: "MB", daily_summary: "デイリー概要", daily_last30: "30日間", hist_records: "ログ(永久)", note_modal_title: "メモ", note_user: "ユーザー名", note_pass: "パスワード", note_email: "メール", note_phone: "電話", note_notes: "メモ", note_save: "保存", cmt_select_title: "コメント選択", cmt_random: "ランダム", cmt_confirm: "送信", fp_modal_title: "指紋プロファイル", fp_reset: "リセット", report_title: "問題を報告", ghost_shield_active: "保護中", ghost_shield_sub: "ページ非表示", sleeping: "スリープ中", daily_likes: "いいね", daily_rt: "RT", daily_cmt: "コメント" },
+            ar: { ghost_on: "شبح: مفعل", ghost_off: "شبح: معطل", connect: "اتصال", close: "إغلاق", nav_op: "لوحة العمليات", nav_usage: "الاستهلاك", nav_cmt: "التعليقات", nav_history: "السجل", this_month: "الشهر", session_mb: "الجلسة", open_all: "فتح الكل", close_all: "إغلاق الكل", total: "إجمالي", online: "نشط", add_new_acc: "إضافة حساب", add_btn: "إضافة", bulk_import: "استيراد", bulk_proxy: "بروكسي", data_saver: "توفير", auto_ping: "فحص", minutes: "دقيقة", status_tracking: "الحالة", test_all: "اختبار", clear: "مسح", ph_user: "@المستخدم", ph_proxy: "البروكسي...", ph_target: "الرابط...", sec: "ثانية", queue: "طابور", report: "تبليغ", this_month_total: "إجمالي الشهر", reset_monthly: "تعيين", log_ready: "النظام جاهز.", log_ghost_active: "وضع الشبح مفعل.", log_ghost_deactive: "وضع الشبح معطل.", log_lang_changed: "تم تغيير اللغة إلى: ", log_acc_added: "تم إضافة الحساب: ", log_acc_deleted: "تم حذف الحساب: ", log_note_saved: "تم حفظ الملاحظة: ",
+                ip_test: "اختبار IP", usage_title: "استهلاك البيانات", th_acc: "الحساب", th_session: "الجلسة", th_month: "الشهر", th_status: "الحالة", th_proxy_loc: "البروكسي/الموقع", cmt_pool_title: "مخزن التعليقات", cmt_ph: "تعليق واحد في كل سطر...", cmt_save: "حفظ", stat_total_lbl: "الإجمالي", stat_today_lbl: "اليوم", stat_month_lbl: "الشهر", stat_like_lbl: "إعجابات", th_time: "الوقت", th_date: "التاريخ", th_type: "الإجراء", th_target: "الهدف", th_mb: "MB", daily_summary: "ملخص اليوم", daily_last30: "آخر 30 يوم", hist_records: "السجل الدائم", note_modal_title: "ملاحظة الحساب", note_user: "المستخدم", note_pass: "كلمة المرور", note_email: "إيميل", note_phone: "هاتف", note_notes: "ملاحظات", note_save: "حفظ", cmt_select_title: "اختيار تعليق", cmt_random: "عشوائي", cmt_confirm: "إرسال", fp_modal_title: "بصمة المتصفح", fp_reset: "إعادة تعيين", report_title: "تبليغ", ghost_shield_active: "الحماية مفعلة", ghost_shield_sub: "الصفحة مخفية", sleeping: "خامل", daily_likes: "إعجاب", daily_rt: "إعادة تغريد", daily_cmt: "تعليق" },
+            hi: { ghost_on: "घोस्ट: चालू", ghost_off: "घोस्ट: बंद", connect: "जुड़ें", close: "बंद करें", nav_op: "ऑपरेशन पैनल", nav_usage: "डेटा", nav_cmt: "टिप्पणी", nav_history: "इतिहास", this_month: "महीना", session_mb: "सत्र", open_all: "सभी खोलें", close_all: "सभी बंद करें", total: "कुल", online: "ऑनलाइन", add_new_acc: "खाता जोड़ें", add_btn: "जोड़ें", bulk_import: "आयात", bulk_proxy: "प्रॉक्सी", data_saver: "बचत", auto_ping: "पिंग", minutes: "मिनट", status_tracking: "स्थिति", test_all: "टेस्ट", clear: "साफ़", ph_user: "@उपयोगकर्ता", ph_proxy: "प्रॉक्सी...", ph_target: "लिंक...", sec: "सेकंड", queue: "कतार", report: "रिपोर्ट", this_month_total: "महीने का कुल", reset_monthly: "रीसेट", log_ready: "सिस्टम तैयार है।", log_ghost_active: "घोस्ट मोड सक्रिय है।", log_ghost_deactive: "घोस्ट मोड अक्षम है।", log_lang_changed: "भाषा बदली गई: ", log_acc_added: "खाता जोड़ा गया: ", log_acc_deleted: "खाता हटा दिया गया: ", log_note_saved: "नोट सहेजा गया: ",
+                ip_test: "IP टेस्ट", usage_title: "डेटा उपयोग", th_acc: "खाता", th_session: "सत्र", th_month: "महीना", th_status: "स्थिति", th_proxy_loc: "प्रॉक्सी/स्थान", cmt_pool_title: "टिप्पणी पूल", cmt_ph: "एक लाइन में एक टिप्पणी...", cmt_save: "सहेजें", stat_total_lbl: "कुल", stat_today_lbl: "आज", stat_month_lbl: "महीना", stat_like_lbl: "पसंद", th_time: "समय", th_date: "तारीख", th_type: "क्रिया", th_target: "लक्ष्य", th_mb: "MB", daily_summary: "दैनिक सारांश", daily_last30: "30 दिन", hist_records: "लॉग्स", note_modal_title: "नोट", note_user: "उपयोगकर्ता", note_pass: "पासवर्ड", note_email: "ईमेल", note_phone: "फ़ोन", note_notes: "नोट्स", note_save: "सहेजें", cmt_select_title: "टिप्पणी चुनें", cmt_random: "रैंडम", cmt_confirm: "भेजें", fp_modal_title: "फिंगरप्रिंट", fp_reset: "रीसेट", report_title: "रिपोर्ट", ghost_shield_active: "सुरक्षा चालू", ghost_shield_sub: "पेज छिपा हुआ है", sleeping: "सो रहा है", daily_likes: "पसंद", daily_rt: "RT", daily_cmt: "टिप्पणी" }
         };
 
-        function toggleLanguage() {
-            let idx = languages.indexOf(currentLang);
-            currentLang = languages[(idx + 1) % languages.length];
+        function changeLanguage(val) {
+            currentLang = val;
             updateUILanguage();
+            writeLog('log_lang_changed', currentLang.toUpperCase());
         }
 
         function updateUILanguage() {
             const l = i18n[currentLang];
-            
-            // data-i18n niteliğine sahip tüm elementleri güncelle
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
                 if(l[key]) el.innerText = l[key];
             });
-
-            // Placeholder'ları güncelle
             document.querySelectorAll('[data-i18n-ph]').forEach(el => {
                 const key = el.getAttribute('data-i18n-ph');
                 if(l[key]) el.placeholder = l[key];
             });
-
-            // Dil butonunu güncelle
-            document.querySelector('#langBtn span').innerText = currentLang.toUpperCase();
-
-            // Hayalet modu butonunu güncelle
             const ghostText = isGhostMode ? l.ghost_on : l.ghost_off;
-            document.querySelector('#ghostToggleBtn span').innerText = ghostText;
+            document.querySelector('#ghostToggleBtn').innerHTML = `<i class="fas fa-${isGhostMode?'eye-slash':'eye'}"></i> <span>${ghostText}</span>`;
             
-            // Statik statülerin anlık güncellemesi (örnek)
             document.querySelectorAll('.status-badge').forEach(badge => {
-                if(!badge.classList.contains('online')) badge.innerText = l.close;
-                else badge.innerText = l.online;
+                if(!badge.classList.contains('online')) badge.innerText = (l.sleeping || "UYKUDA").toUpperCase();
+                else badge.innerText = l.online.toUpperCase();
             });
-
-            writeLog(`🌐 Language changed to: ${currentLang.toUpperCase()}`);
+            renderAccounts();
+            if(statsChart) renderDailyStats(); // Grafiği yeni dille tazele
         }
 
         let currentFpUsername=null;
@@ -657,7 +614,7 @@
         // ── Parmak izi modal ──────────────────────────────────────────────────
         function openFpModal(username){
             currentFpUsername=username;
-            document.getElementById('fpModalTitle').innerText='Parmak İzi: @'+username;
+            document.getElementById('fpModalTitle').innerHTML = `<span data-i18n="fp_modal_title">${i18n[currentLang].fp_modal_title}</span>: @${username}`;
             document.getElementById('fpResetBtn').setAttribute('data-user',username);
             document.getElementById('fpModal').classList.add('active');
             ipcRenderer.send('get-fingerprint',username);
@@ -696,13 +653,13 @@
         ipcRenderer.on('log-message',(e,msg)=>writeLog(msg));
 
         // ── Not ───────────────────────────────────────────────────────────────
-        function openNote(username){document.getElementById('noteUsername').value=username;document.getElementById('noteModalTitle').innerText='Not: @'+username;const n=notesData[username]||{};document.getElementById('noteUser').value=n.username||'';document.getElementById('notePass').value=n.password||'';document.getElementById('noteEmail').value=n.email||'';document.getElementById('notePhone').value=n.phone||'';document.getElementById('noteText').value=n.notes||'';document.getElementById('noteModal').classList.add('active');}
+        function openNote(username){document.getElementById('noteUsername').value=username;document.getElementById('noteModalTitle').innerHTML=`<span data-i18n="note_modal_title">${i18n[currentLang].note_modal_title}</span>: @${username}`;const n=notesData[username]||{};document.getElementById('noteUser').value=n.username||'';document.getElementById('notePass').value=n.password||'';document.getElementById('noteEmail').value=n.email||'';document.getElementById('notePhone').value=n.phone||'';document.getElementById('noteText').value=n.notes||'';document.getElementById('noteModal').classList.add('active');}
         function closeNote(){document.getElementById('noteModal').classList.remove('active');}
         function saveNote(){const u=document.getElementById('noteUsername').value;const note={username:document.getElementById('noteUser').value,password:document.getElementById('notePass').value,email:document.getElementById('noteEmail').value,phone:document.getElementById('notePhone').value,notes:document.getElementById('noteText').value};ipcRenderer.send('save-note',{username:u,note});closeNote();writeLog(`📝 @${u} notu kaydedildi.`);}
         ipcRenderer.on('notes-update',(e,d)=>{notesData=d;});
 
         // ── Yorum seçme ───────────────────────────────────────────────────────
-        function openCommentSelect(){if(!comments.length){alert('Yorum havuzu boş!');return;}selectedComment=null;document.getElementById('confirmCmtBtn').disabled=true;document.getElementById('commentSelectList').innerHTML=comments.map((c,i)=>`<div class="cmt-select-item" id="csi-${i}" onclick="selectComment(${i})"><span style="color:var(--gray);font-size:12px;min-width:22px;">${i+1}.</span><span>${c}</span></div>`).join('');document.getElementById('commentSelectModal').classList.add('active');}
+        function openCommentSelect(){if(!comments.length){alert('Yorum havuzu boş!');return;}selectedComment=null;document.getElementById('confirmCmtBtn').disabled=true;document.getElementById('commentSelectList').innerHTML=comments.map((c,i)=>`<div class="cmt-select-item" id="csi-${i}" onclick="selectComment(${i})"><span style="color:var(--gray);font-size:12px;min-width:22px;">${i+1}.</span><span>${c}</span></div>`).join('');document.getElementById('commentSelectModal').classList.add('active');updateUILanguage();}
         function closeCommentSelect(){document.getElementById('commentSelectModal').classList.remove('active');selectedComment=null;}
         function selectComment(idx){document.querySelectorAll('.cmt-select-item').forEach(el=>el.classList.remove('selected'));if(idx==='__random__'){selectedComment='__random__';document.getElementById('confirmCmtBtn').disabled=false;return;}selectedComment=idx;document.getElementById(`csi-${idx}`)?.classList.add('selected');document.getElementById('confirmCmtBtn').disabled=false;}
         function confirmCommentSelection(){closeCommentSelect();runAction('comment',null,selectedComment);}
@@ -739,9 +696,11 @@
             ipcRenderer.send('get-notes');
             ipcRenderer.send('get-daily-ops');
             ipcRenderer.send('get-history');
+            updateUILanguage();
+            writeLog('log_ready');
         });
 
-        function toggleGhostMode(){isGhostMode=!isGhostMode;ipcRenderer.send('toggle-ghost-mode',isGhostMode);const btn=document.getElementById('ghostToggleBtn');if(isGhostMode){btn.innerHTML='<i class="fas fa-eye-slash"></i> <span>HAYALET: AÇIK</span>';btn.style.background='#f91880';document.querySelectorAll('.card').forEach(c=>c.classList.add('ghost-active'));writeLog('👻 Hayalet Modu AKTİF — API mod, sayfa yüklenmez.');}else{btn.innerHTML='<i class="fas fa-eye"></i> <span>HAYALET: KAPALI</span>';btn.style.background='#4a148c';document.querySelectorAll('.card').forEach(c=>c.classList.remove('ghost-active'));writeLog('👁️ Hayalet Modu kapatıldı.');}}
+        function toggleGhostMode(){isGhostMode=!isGhostMode;ipcRenderer.send('toggle-ghost-mode',isGhostMode);const btn=document.getElementById('ghostToggleBtn');if(isGhostMode){btn.style.background='#f91880';document.querySelectorAll('.card').forEach(c=>c.classList.add('ghost-active'));writeLog('log_ghost_active');}else{btn.style.background='#4a148c';document.querySelectorAll('.card').forEach(c=>c.classList.remove('ghost-active'));writeLog('log_ghost_deactive');}updateUILanguage();}
         function toggleDataSaver(){const e=document.getElementById('saverCheck').checked;ipcRenderer.send('update-data-saver',e);writeLog(`Veri Tasarrufu: ${e?'AÇIK':'KAPALI'}`);}
 
         ipcRenderer.send('get-data','accounts');
@@ -750,7 +709,6 @@
         ipcRenderer.on('update-comments',(e,d)=>{comments=d;renderComments();});
         ipcRenderer.on('network-usage-update',(e,stats)=>{usageData=stats;updateUsageUI();});
         
-        // Otomatik yakalanan tokenları kaydet
         ipcRenderer.on('auth-token-captured', (e, { username, authToken }) => {
             const acc = accounts.find(a => a.username === username);
             if (acc && acc.authToken !== authToken) {
@@ -771,6 +729,7 @@
 
         function updateUsageUI(){
             let g=0;const month=getMonthKey();
+            const l = i18n[currentLang];
             accounts.forEach(acc=>{const b=usageData[acc.username]?usageData[acc.username].downloaded:0;const mb=(b/(1024*1024)).toFixed(2);g+=parseFloat(mb);const badge=document.getElementById(`mb-badge-${acc.username}`);if(badge)badge.innerText=mb+' MB';});
             document.getElementById('grandTotalUsage').innerText=g.toFixed(2)+' MB';
             if(document.getElementById('tab-usage').classList.contains('active')){
@@ -779,7 +738,8 @@
                     const mb2=((monthlyData[month]?.accounts?.[acc.username]||0)/(1024*1024)).toFixed(2);
                     const pd=proxyData[acc.username];const loc=pd&&pd.status==='Aktif'?`${pd.city||'?'}, ${pd.country||'?'}`:'---';
                     const latStr=pd&&pd.latency!=null?`<span class="latency-badge ${latencyClass(pd.latency)}" style="margin-left:6px;">${latencyLabel(pd.latency)}</span>`:'';
-                    return`<tr><td>@${acc.username}</td><td style="color:var(--main);font-weight:bold;">${smb} MB</td><td style="color:#ba68c8;font-weight:bold;">${mb2} MB</td><td>${activeSessions.has(acc.username)?'<span style="color:var(--green)">AKTİF</span>':'UYKUDA'}</td><td style="font-size:11px;color:var(--gray);">${acc.proxy}<br><span style="color:var(--green);font-size:10px;">${loc}</span>${latStr}</td></tr>`;
+                    const statusText = activeSessions.has(acc.username)? (l.online||"AKTİF") : (l.sleeping||"UYKUDA");
+                    return`<tr><td>@${acc.username}</td><td style="color:var(--main);font-weight:bold;">${smb} MB</td><td style="color:#ba68c8;font-weight:bold;">${mb2} MB</td><td><span style="color:${activeSessions.has(acc.username)?'var(--green)':'var(--gray)'}">${statusText}</span></td><td style="font-size:11px;color:var(--gray);">${acc.proxy}<br><span style="color:var(--green);font-size:10px;">${loc}</span>${latStr}</td></tr>`;
                 }).join('');
             }
         }
@@ -787,6 +747,7 @@
         function renderDailyStats(){
             const today=getTodayKey(),month=getMonthKey();
             const keys=Object.keys(dailyOpsData).sort().reverse().slice(0,30);
+            const l = i18n[currentLang];
             
             // ── Grafik Güncelleme (Chart.js) ──
             const chartLabels = Object.keys(dailyOpsData).sort().slice(-14); // Son 14 gün
@@ -807,9 +768,9 @@
                     data: {
                         labels: chartLabels,
                         datasets: [
-                            { label: 'Beğeni', data: likeData, borderColor: '#f91880', backgroundColor: '#f9188011', tension: 0.4, fill: true, pointRadius: 4 },
-                            { label: 'RT', data: rtData, borderColor: '#1d9bf0', backgroundColor: '#1d9bf011', tension: 0.4, fill: true, pointRadius: 4 },
-                            { label: 'Yorum', data: cmtData, borderColor: '#00ba7c', backgroundColor: '#00ba7c11', tension: 0.4, fill: true, pointRadius: 4 }
+                            { label: l.daily_likes || 'Beğeni', data: likeData, borderColor: '#f91880', backgroundColor: '#f9188011', tension: 0.4, fill: true, pointRadius: 4 },
+                            { label: l.daily_rt || 'RT', data: rtData, borderColor: '#1d9bf0', backgroundColor: '#1d9bf011', tension: 0.4, fill: true, pointRadius: 4 },
+                            { label: l.daily_cmt || 'Yorum', data: cmtData, borderColor: '#00ba7c', backgroundColor: '#00ba7c11', tension: 0.4, fill: true, pointRadius: 4 }
                         ]
                     },
                     options: {
@@ -873,6 +834,7 @@
         });
 
         function toggleIpTest(u){
+            if(!u) return;
             const acc=accounts.find(a=>a.username===u);if(!acc)return;
             const span=document.getElementById(`ip-info-${u}`);
             if(span){span.innerText='[test...]';span.style.color='var(--orange)';}
@@ -1038,6 +1000,7 @@
             if(!wv||!acc)return;
             ipcRenderer.send('setup-session',{username:u,proxy:acc.proxy||'',partition:wv.getAttribute('partition'), authToken: acc.authToken});
             setTimeout(()=>{
+                const l = i18n[currentLang];
                 // Token varsa direkt home'a git, yoksa login'e
                 const startUrl = acc.authToken ? 'https://x.com/home' : 'https://x.com/login';
                 wv.loadURL(startUrl);
@@ -1050,7 +1013,7 @@
             },800);
         }
 
-        function stopAcc(u){const wv=document.getElementById('wv-'+u);if(wv){wv.loadURL('about:blank');activeSessions.delete(u);const b=document.getElementById('st-'+u);if(b){b.className='status-badge';b.innerText='UYKUDA';}updateStats();}}
+        function stopAcc(u){const wv=document.getElementById('wv-'+u);if(wv){wv.loadURL('about:blank');activeSessions.delete(u);const b=document.getElementById('st-'+u);if(b){b.className='status-badge';b.innerText=(i18n[currentLang].sleeping||'UYKUDA').toUpperCase();}updateStats();}}
         function enableEdit(index){const c=document.getElementById(`container-${index}`);const cur=accounts[index].username;c.innerHTML=`<input type="text" id="input-${index}" class="edit-input" value="${cur}" onblur="saveEdit(${index})" onkeyup="checkKey(event,${index})">`;const inp=document.getElementById('input-'+index);inp.focus();inp.select();c.onclick=null;}
         function checkKey(e,i){if(e.key==='Enter')saveEdit(i);if(e.key==='Escape')renderAccounts();}
         function saveEdit(index){const inp=document.getElementById('input-'+index);if(!inp)return;const n=inp.value.replace('@','').trim();if(n&&n!==accounts[index].username){accounts[index].username=n;ipcRenderer.send('save-accounts',accounts);}renderAccounts();}
@@ -1283,6 +1246,71 @@
             }
             writeLog(`✅ Tüm işlemler tamamlandı.`);
         }
+    </script>
+    
+    <!-- HTML data-i18n eklemeleri -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Usage Tab Headers
+            const uTable = document.querySelector('#tab-usage table thead tr');
+            if(uTable) uTable.innerHTML = `
+                <th data-i18n="th_acc">Hesap</th>
+                <th data-i18n="th_session">Oturum</th>
+                <th data-i18n="th_month">Bu Ay</th>
+                <th data-i18n="th_status">Durum</th>
+                <th data-i18n="th_proxy_loc">Proxy / Konum</th>`;
+                
+            // History Tab Labels
+            document.querySelectorAll('.stat-box .sl').forEach((el, idx) => {
+                const keys = ['stat_total_lbl', 'stat_today_lbl', 'stat_month_lbl', 'stat_like_lbl'];
+                el.setAttribute('data-i18n', keys[idx]);
+            });
+            
+            // Daily Summary Headers
+            const dTable = document.querySelector('.daily-table thead tr');
+            if(dTable) dTable.innerHTML = `<th data-i18n="th_date">Tarih</th><th>❤</th><th>🔁</th><th>💬</th>`;
+            
+            // History Records Headers
+            const hTable = document.querySelector('.history-table thead tr');
+            if(hTable) hTable.innerHTML = `
+                <th data-i18n="th_time">Saat</th>
+                <th data-i18n="th_date">Tarih</th>
+                <th data-i18n="th_type">İşlem</th>
+                <th data-i18n="th_target">Hedef</th>
+                <th data-i18n="th_acc">Hesap</th>
+                <th style="color:var(--main)" data-i18n="th_mb">MB</th>
+                <th data-i18n="th_status">Durum</th>`;
+
+            // CMT Tab
+            const cmtTitle = document.querySelector('#tab-cmt h2');
+            if(cmtTitle) cmtTitle.setAttribute('data-i18n', 'cmt_pool_title');
+            const cmtArea = document.querySelector('#commentInput');
+            if(cmtArea) cmtArea.setAttribute('data-i18n-ph', 'cmt_ph');
+            const cmtBtn = document.querySelector('#tab-cmt button');
+            if(cmtBtn) cmtBtn.setAttribute('data-i18n', 'cmt_save');
+
+            // Modals Labels
+            const noteLabels = document.querySelectorAll('.note-field-label');
+            const noteKeys = ['note_user', 'note_pass', 'note_email', 'note_phone', 'note_notes'];
+            noteLabels.forEach((el, i) => el.setAttribute('data-i18n', noteKeys[i]));
+            const noteSaveBtn = document.querySelector('.note-modal-box .btn-mini');
+            if(noteSaveBtn) noteSaveBtn.setAttribute('data-i18n', 'note_save');
+
+            const cmtSelectTitle = document.querySelector('.cmt-select-box h3');
+            if(cmtSelectTitle) cmtSelectTitle.setAttribute('data-i18n', 'cmt_select_title');
+            const cmtRandomBtn = document.querySelector('.cmt-select-box .btn-dark');
+            if(cmtRandomBtn) cmtRandomBtn.setAttribute('data-i18n', 'cmt_random');
+            const cmtConfirmBtn = document.querySelector('#confirmCmtBtn');
+            if(cmtConfirmBtn) cmtConfirmBtn.setAttribute('data-i18n', 'cmt_confirm');
+
+            const fpResetBtn = document.querySelector('#fpResetBtn');
+            if(fpResetBtn) fpResetBtn.setAttribute('data-i18n', 'fp_reset');
+
+            const reportNextBtn = document.querySelector('#reportNextBtn');
+            if(reportNextBtn) reportNextBtn.setAttribute('data-i18n', 'report_next');
+            
+            updateUILanguage();
+        });
     </script>
 </body>
 </html>
