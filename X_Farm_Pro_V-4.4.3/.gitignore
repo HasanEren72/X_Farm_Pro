@@ -1,0 +1,99 @@
+# =============================================
+# .gitignore — X-Farm Pro
+# Node.js + Unity + Web projesi için
+# =============================================
+
+# ── Node.js (KESİNLİKLE yüklenmesin) ────────
+node_modules/
+sessions/
+.npm/
+.node_repl_history
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.yarn/
+
+# ── Ortam & Gizli Bilgiler ────────────────────
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+*.pem
+*.key
+secrets.json
+config.local.*
+
+# ── Derleme & Cache ───────────────────────────
+dist/
+build/
+out/
+.cache/
+.temp/
+.parcel-cache/
+.next/
+.nuxt/
+.turbo/
+
+# ── Log Dosyaları ─────────────────────────────
+logs/
+*.log
+*.log.*
+
+# ── Unity Generated ───────────────────────────
+Library/
+Temp/
+Obj/
+Build/
+Builds/
+Logs/
+MemoryCaptures/
+UserSettings/
+.vs/
+
+# ── OS Generated ──────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ── IDE & Editör ──────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.userosscache
+*.sln.docstates
+*.sln.iml
+
+# ── Unity Asset Meta (koşullu) ────────────────
+!*.meta
+
+# ── Büyük Binary Builds ───────────────────────
+*.apk
+*.aab
+*.xcodeproj
+*.xcworkspace
+*.app
+*.ipa
+*.exe
+*.dmg
+*.zip
+*.tar.gz
+
+# ── Geçici Dosyalar ───────────────────────────
+*.tmp
+*.bak
+*.orig
+*.swp
+*.swo
+*~
+crashlytics-build.properties
