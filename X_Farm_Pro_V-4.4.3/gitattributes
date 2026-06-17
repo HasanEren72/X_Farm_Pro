@@ -1,0 +1,94 @@
+# =============================================
+# .gitattributes — X-Farm Pro
+# Node.js + Unity + Web projesi için
+# =============================================
+
+# ── Varsayılan: otomatik satır sonu ───────────
+* text=auto
+
+# ── Unity ─────────────────────────────────────
+*.meta           text
+*.unity          text
+*.prefab         text
+*.mat            text
+*.anim           text
+*.controller     text
+*.mask           text
+*.asset          text
+*.playable       text
+*.overrideController text
+
+# ── Web & Node.js ─────────────────────────────
+*.js             text eol=lf
+*.mjs            text eol=lf
+*.cjs            text eol=lf
+*.ts             text eol=lf
+*.jsx            text eol=lf
+*.tsx            text eol=lf
+*.json           text eol=lf
+*.html           text eol=lf
+*.css            text eol=lf
+*.scss           text eol=lf
+*.sass           text eol=lf
+*.md             text eol=lf
+*.txt            text eol=lf
+*.yml            text eol=lf
+*.yaml           text eol=lf
+*.xml            text eol=lf
+*.env            text eol=lf
+*.sh             text eol=lf
+*.cs             text eol=lf
+
+# ── Windows Scriptleri (CRLF) ─────────────────
+*.bat            text eol=crlf
+*.cmd            text eol=crlf
+*.ps1            text eol=crlf
+
+# ── Görseller (binary) ────────────────────────
+*.png            binary
+*.jpg            binary
+*.jpeg           binary
+*.gif            binary
+*.webp           binary
+*.tga            binary
+*.psd            binary
+*.ico            binary
+*.svg            text eol=lf
+
+# ── Ses (binary) ──────────────────────────────
+*.mp3            binary
+*.ogg            binary
+*.wav            binary
+*.flac           binary
+*.aac            binary
+
+# ── Video (binary) ────────────────────────────
+*.mp4            binary
+*.mov            binary
+*.avi            binary
+*.webm           binary
+
+# ── 3D Modeller (binary) ──────────────────────
+*.fbx            binary
+*.obj            binary
+*.blend          binary
+*.3ds            binary
+*.dae            binary
+
+# ── Fontlar (binary) ──────────────────────────
+*.ttf            binary
+*.otf            binary
+*.woff           binary
+*.woff2          binary
+
+# ── Arşiv & Büyük Dosyalar ────────────────────
+*.zip            binary
+*.tar            binary
+*.tar.gz         binary
+*.7z             binary
+*.rar            binary
+
+# ── Veritabanı ────────────────────────────────
+*.db             binary
+*.sqlite         binary
+*.sqlite3        binary
