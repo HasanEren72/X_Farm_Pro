@@ -49,6 +49,7 @@ To run the project on your local machine:
 2.**Install dependencies:**
 
   npm install
+  
 3.**Launch the application:**
 
-  npm Start
+  npm start
