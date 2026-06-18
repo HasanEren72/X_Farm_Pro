@@ -4,6 +4,7 @@
 X-Farm, X (Twitter) hesaplarını yönetmek için tasarlanmış, anti-detect (tespit edilemez) özelliklere sahip yüksek performanslı bir masaüstü uygulamasıdır. Electron altyapısı üzerine inşa edilen bu proje, hesapların bot tespit algoritmalarına yakalanmasını engellemek için tarayıcı parmak izlerini manipüle eder ve her hesap için izole edilmiş oturumlar sunar.
 
 # Öne Çıkan Özellikler
+![photo](https://github.com/HasanEren72/X_Farm_Pr/blob/main/Photos/a.png)
 - 🎭 Gelişmiş Anti-Detect & Parmak İzi (Fingerprinting)
 Deterministik Parmak İzi: Her kullanıcı adı için benzersiz ama tutarlı bir profil (User-Agent, Platform, Donanım bilgileri) oluşturur.
 %90 Mobil Uyumluluk: X'in daha az şüpheli bulduğu mobil cihaz profillerini (iPhone 15 Pro, Galaxy S24 Ultra vb.) taklit eder.
