@@ -46,10 +46,10 @@ To run the project on your local machine:
    
    clone https://github.com/kullaniciadi/x-farm-pro.git
    
-2.**Install dependencies:**
+ 2.**Install dependencies:**
 
-  npm install
+   npm install
   
-3.**Launch the application:**
+ 3.**Launch the application:**
 
-  npm start
+   npm start
