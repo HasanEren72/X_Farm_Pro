@@ -43,5 +43,12 @@ X-Farm is a high-performance desktop application with anti-detect capabilities d
 To run the project on your local machine:
 
 1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/HasanEren72/X_Farm_Pro.git](https://github.com/HasanEren72/X_Farm_Pro.git)
+   
+   clone https://github.com/kullaniciadi/x-farm-pro.git
+   
+2.**Install dependencies:**
+
+  npm install
+3.**Launch the application:**
+
+  npm Start
