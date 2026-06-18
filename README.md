@@ -44,7 +44,7 @@ To run the project on your local machine:
 
 1. **Clone the repository:**
    
-   clone https://github.com/userName/x-farm-pro.git
+   clone https://github.com/HasanEren72/X_Farm_Pro
    
  2. **Install dependencies:**
 
