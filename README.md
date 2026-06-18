@@ -10,6 +10,8 @@ X-Farm, X (Twitter) hesaplarını yönetmek için tasarlanmış, anti-detect (te
 Deterministik Parmak İzi: Her kullanıcı adı için benzersiz ama tutarlı bir profil (User-Agent, Platform, Donanım bilgileri) oluşturur.
 %90 Mobil Uyumluluk: X'in daha az şüpheli bulduğu mobil cihaz profillerini (iPhone 15 Pro, Galaxy S24 Ultra vb.) taklit eder.
 Gürültü Enjeksiyonu (Noise Injection): Canvas, WebGL ve AudioContext seviyesinde gürültü ekleyerek gerçek donanım kimliğini gizler.
+![photo](https://github.com/HasanEren72/X_Farm_Pro/blob/main/Photos%20Mat/c.png)
+
 Otomasyon Gizleme: navigator.webdriver ve Chromium otomasyon bayraklarını tamamen devre dışı bırakır.
 - 🛡️ Güvenlik & Bypass Çözümleri
 c.png Çözümü: Windows Hello ve WebAuthn (FIDO2) katmanlarını pasifize ederek güvenlik anahtarı sorma sorunlarını kökten çözer.
@@ -28,6 +30,7 @@ Framework: Electron.js
 Network: Axios & HttpsProxyAgent
 Data Persistence: JSON tabanlı dosya sistemi (accounts, fingerprints, history, notes)
 Security: Crypto-based deterministic seed generation
+![photo](https://github.com/HasanEren72/X_Farm_Pro/blob/main/Photos%20Mat/b.png)
 
 # ⚙️ Kurulum
 Projeyi yerel makinenizde çalıştırmak için:
