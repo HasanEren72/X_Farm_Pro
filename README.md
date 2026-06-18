@@ -2,6 +2,7 @@
  # X-Farm Pro: Advanced Anti-Detect & Account Management System
 
 X-Farm, X (Twitter) hesaplarını yönetmek için tasarlanmış, anti-detect (tespit edilemez) özelliklere sahip yüksek performanslı bir masaüstü uygulamasıdır. Electron altyapısı üzerine inşa edilen bu proje, hesapların bot tespit algoritmalarına yakalanmasını engellemek için tarayıcı parmak izlerini manipüle eder ve her hesap için izole edilmiş oturumlar sunar.
+
 ![photo](https://github.com/HasanEren72/X_Farm_Pro/blob/main/Photos%20Mat/a.png)
 
 # Öne Çıkan Özellikler
