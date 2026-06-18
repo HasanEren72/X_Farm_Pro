@@ -3,12 +3,15 @@
 
 X-Farm, X (Twitter) hesaplarını yönetmek için tasarlanmış, anti-detect (tespit edilemez) özelliklere sahip yüksek performanslı bir masaüstü uygulamasıdır. Electron altyapısı üzerine inşa edilen bu proje, hesapların bot tespit algoritmalarına yakalanmasını engellemek için tarayıcı parmak izlerini manipüle eder ve her hesap için izole edilmiş oturumlar sunar.
 
+![photo](https://github.com/HasanEren72/X_Farm_Pro/blob/main/Photos%20Mat/a.png)
+
 # Öne Çıkan Özellikler
-![photo](https://github.com/HasanEren72/X_Farm_Pr/blob/main/Photos/a.png)
 - 🎭 Gelişmiş Anti-Detect & Parmak İzi (Fingerprinting)
 Deterministik Parmak İzi: Her kullanıcı adı için benzersiz ama tutarlı bir profil (User-Agent, Platform, Donanım bilgileri) oluşturur.
 %90 Mobil Uyumluluk: X'in daha az şüpheli bulduğu mobil cihaz profillerini (iPhone 15 Pro, Galaxy S24 Ultra vb.) taklit eder.
 Gürültü Enjeksiyonu (Noise Injection): Canvas, WebGL ve AudioContext seviyesinde gürültü ekleyerek gerçek donanım kimliğini gizler.
+![photo](https://github.com/HasanEren72/X_Farm_Pro/blob/main/Photos%20Mat/c.png)
+
 Otomasyon Gizleme: navigator.webdriver ve Chromium otomasyon bayraklarını tamamen devre dışı bırakır.
 - 🛡️ Güvenlik & Bypass Çözümleri
 c.png Çözümü: Windows Hello ve WebAuthn (FIDO2) katmanlarını pasifize ederek güvenlik anahtarı sorma sorunlarını kökten çözer.
@@ -22,6 +25,8 @@ Ghost Mode: Sadece gerekli API çağrılarına izin vererek medya ve görsel yü
 Proxy Yönetimi: HTTP/HTTPS proxy desteği ve anlık gecikme (latency) testleri.
 Aylık Veri Takibi: Hesap bazlı veri kullanımı ve işlem istatistikleri.
 İşlem Geçmişi: Yapılan tüm işlemlerin kalıcı olarak loglanması.
+![photo](https://github.com/HasanEren72/X_Farm_Pro/blob/main/Photos%20Mat/b.png)
+
 - 🛠️ Teknik Altyapı
 Framework: Electron.js
 Network: Axios & HttpsProxyAgent
