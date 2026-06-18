@@ -25,12 +25,13 @@ Ghost Mode: Sadece gerekli API çağrılarına izin vererek medya ve görsel yü
 Proxy Yönetimi: HTTP/HTTPS proxy desteği ve anlık gecikme (latency) testleri.
 Aylık Veri Takibi: Hesap bazlı veri kullanımı ve işlem istatistikleri.
 İşlem Geçmişi: Yapılan tüm işlemlerin kalıcı olarak loglanması.
+![photo](https://github.com/HasanEren72/X_Farm_Pro/blob/main/Photos%20Mat/b.png)
+
 - 🛠️ Teknik Altyapı
 Framework: Electron.js
 Network: Axios & HttpsProxyAgent
 Data Persistence: JSON tabanlı dosya sistemi (accounts, fingerprints, history, notes)
 Security: Crypto-based deterministic seed generation
-![photo](https://github.com/HasanEren72/X_Farm_Pro/blob/main/Photos%20Mat/b.png)
 
 # ⚙️ Kurulum
 Projeyi yerel makinenizde çalıştırmak için:
